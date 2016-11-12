@@ -1,0 +1,12 @@
+services:
+    follower_event_listener:
+        class: Follower\CoreBundle\Event\FollowerEventListener
+        arguments:
+            - "@database_connection"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    follower_event_dispatcher:
+        class: Follower\CoreBundle\Event\FollowerEventDispatcher
+        arguments:
+            - "@event_dispatcher"

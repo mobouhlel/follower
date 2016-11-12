@@ -1,0 +1,8 @@
+follower_core:
+    resource: "@FollowerCoreBundle/Resources/config/routing.yml"
+    prefix:   /
+
+follower_twitter:
+    resource: "@FollowerTwitterBundle/Resources/config/routing.yml"
+    prefix:   /
+

@@ -1,0 +1,68 @@
+<?php
+
+namespace Follower\CoreBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Provider
+ *
+ * @ORM\Table(name="provider")
+ * @ORM\Entity(repositoryClass="Follower\CoreBundle\Repository\ProviderRepository")
+ */
+class Provider
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="active", type="boolean")
+     */
+    private $active;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="daily_like", type="integer")
+     */
+    private $dailyLike;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="daily_follow", type="integer")
+     */
+    private $dailyFollow;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="daily_unfollow", type="integer")
+     */
+    private $dailyUnfollow;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Tag", mappedBy="provider")
+     */
+    private $tags;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Follow", mappedBy="provider")
+     */
+    private $follows;
+}

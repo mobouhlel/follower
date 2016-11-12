@@ -1,0 +1,31 @@
+services:
+    twitter_like:
+        class: Follower\TwitterBundle\Service\Factory\Like
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+    twitter_follow:
+        class: Follower\TwitterBundle\Service\Factory\Follow
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+    twitter_unfollow:
+        class: Follower\TwitterBundle\Service\Factory\Unfollow
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+    twitter_search:
+        class: Follower\TwitterBundle\Service\Factory\Search
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+    twitter_follower:
+        class: Follower\TwitterBundle\Service\Follower
+        arguments: ["@service_container"]
+    twitter_unfollower:
+        class: Follower\TwitterBundle\Service\Unfollower
+        arguments: ["@service_container"]

@@ -1,0 +1,48 @@
+<?php
+
+namespace Follower\CoreBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Tag
+ *
+ * @ORM\Table(name="tag")
+ * @ORM\Entity(repositoryClass="Follower\CoreBundle\Repository\TagRepository")
+ */
+class Tag
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Provider", inversedBy="tags")
+     * @ORM\JoinColumn(name="provider_id", referencedColumnName="id")
+     */
+    private $provider;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="status", type="boolean")
+     */
+    private $status = true;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Follow", mappedBy="tag")
+     */
+    private $follows;
+}

@@ -1,0 +1,3 @@
+follower_twitter_homepage:
+    path:     /
+    defaults: { _controller: FollowerTwitterBundle:Default:index }
