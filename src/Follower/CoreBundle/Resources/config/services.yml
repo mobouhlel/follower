@@ -10,3 +10,23 @@ services:
         class: Follower\CoreBundle\Event\FollowerEventDispatcher
         arguments:
             - "@event_dispatcher"
+
+    core_follower_wrapper:
+        class: Follower\CoreBundle\Wrapper\FollowerWrapper
+        arguments:
+            - "@service_container"
+
+    core_unfollower_wrapper:
+        class: Follower\CoreBundle\Wrapper\UnfollowerWrapper
+        arguments:
+            - "@service_container"
+
+    core_liker_wrapper:
+        class: Follower\CoreBundle\Wrapper\LikerWrapper
+        arguments:
+            - "@service_container"
+
+    core_unliker_wrapper:
+        class: Follower\CoreBundle\Wrapper\UnlikerWrapper
+        arguments:
+            - "@service_container"

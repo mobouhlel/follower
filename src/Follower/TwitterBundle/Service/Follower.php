@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManager;
 use Follower\CoreBundle\Entity\Provider;
 use Follower\CoreBundle\Helper\TimeHelper;
 use Follower\CoreBundle\Schema\Item;
+use Follower\CoreBundle\Wrapper\FollowerWrapper;
 use Follower\TwitterBundle\Service\Factory\Follow;
 use Follower\TwitterBundle\Service\Factory\Search;
 use Symfony\Component\DependencyInjection\Container;
@@ -28,6 +29,9 @@ class Follower
     /** @var  EntityManager $em */
     protected $em;
 
+    /** @var  FollowerWrapper $wrapper */
+    protected $wrapper;
+
     /**
      * DailyFollower constructor.
      * @param Container $container
@@ -37,16 +41,21 @@ class Follower
         $this->container = $container;
 
         $this->em = $container->get('doctrine.orm.entity_manager');
+
+        $this->wrapper = $container->get('core_follower_wrapper');
     }
 
     public function follow()
     {
         /** @var Provider $provider */
-        $provider = $this->em->getRepository('FollowerCoreBundle:Provider')->findOneBy(array('id' => 1));
+        $provider = $this->wrapper->getProvider(1);
 
-        $sleepTime = TimeHelper::calculateSleepTime($provider->getDailyFollow());
+        $tags = $this->wrapper->getActiveTags($provider['id']);
 
-        var_dump("sleep time: ". $sleepTime);
+        $sleepTime = TimeHelper::calculateSleepTime($provider['daily_follow']);
+
+        var_dump("sleep time between each request: ". $sleepTime);
+
         /** @var Search $followFactory */
         $searchFactory = $this->getSearchFactory();
 
@@ -54,28 +63,33 @@ class Follower
         $followFactory = $this->getFollowFactory();
 
         while (true) {
-            foreach ($provider->getTags() as $tag) {
+            foreach ($tags as $tag) {
                 try {
-                    $result = $searchFactory->search($tag->getName());
+                    $result = $searchFactory->search($tag['name']);
 
                     /** @var Item $item */
                     foreach ($result as $item) {
-                        if($item->isFollowing())
+                        if($item->isFollowing() || $this->wrapper->isFollowed($provider['id'], $item->getUserId(), $item->getUserName())) {
+                            var_dump($item->getUserName() . ' followed already');
+
                             continue;
+                        }
 
                         $status = $followFactory->follow($item->getUserId());
 
                         $this->container->get('follower_event_dispatcher')->dispatchFollowed(array(
                             'followed' => $status,
-                            'provider_id' => $provider->getId(),
-                            'tag_id' => $tag->getId(),
+                            'provider_id' => $provider['id'],
+                            'tag_id' => $tag['id'],
+                            'tag_name' => $tag['name'],
                             'user' => $item->getUserName() ? $item->getUserName() : $item->getUserId()
                         ));
 
                         var_dump(array(
                             'followed' => $status,
-                            'provider_id' => $provider->getId(),
-                            'tag_id' => $tag->getId(),
+                            'provider_id' => $provider['id'],
+                            'tag_id' => $tag['id'],
+                            'tag_name' => $tag['name'],
                             'user' => $item->getUserName() ? $item->getUserName() : $item->getUserId()
                         ));
 
