@@ -10,6 +10,7 @@ namespace Follower\TwitterBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Follower\CoreBundle\Entity\Provider;
+use Follower\CoreBundle\Event\Event;
 use Follower\CoreBundle\Helper\TimeHelper;
 use Follower\CoreBundle\Schema\Item;
 use Follower\CoreBundle\Wrapper\FollowerWrapper;
@@ -55,8 +56,6 @@ class Follower
 
         $sleepTime = TimeHelper::calculateSleepTime($provider['daily_follow']);
 
-        var_dump("sleep time between each request: ". $sleepTime);
-
         /** @var Search $followFactory */
         $searchFactory = $this->getSearchFactory();
 
@@ -71,32 +70,50 @@ class Follower
                     /** @var Item $item */
                     foreach ($result as $item) {
                         if($item->isFollowing() || $this->wrapper->isFollowed($provider['id'], $item->getUserId(), $item->getUserName())) {
-                            var_dump($item->getUserName() . ' followed already');
-
+                            $this->container->get('follower_event_dispatcher')->dispatchFollowedAlready((new Event())
+                                ->setProviderId(1)
+                                ->setProviderName('Twitter')
+                                ->setStatus(true)
+                                ->setTransctionType(Event::TRANSACTION_FOLLOW)
+                                ->setData(array(
+                                    'tag_id' => $tag['id'],
+                                    'tag_name' => $tag['name'],
+                                    'user_id' => $item->getUserId(),
+                                    'user_name' => $item->getUserName()
+                                ))
+                            );
                             continue;
                         }
 
-                        $status = $followFactory->follow($item->getUserId());
+                        if($followFactory->follow($item->getUserId())) {
+                            $this->container->get('follower_event_dispatcher')->dispatchFollowed((new Event())
+                                ->setProviderId(1)
+                                ->setProviderName('Twitter')
+                                ->setStatus(true)
+                                ->setTransctionType(Event::TRANSACTION_FOLLOW)
+                                ->setData(array(
+                                    'tag_id' => $tag['id'],
+                                    'tag_name' => $tag['name'],
+                                    'user_id' => $item->getUserId(),
+                                    'user_name' => $item->getUserName()
+                                ))
+                            );
+                        } else {
+                            $this->container->get('follower_event_dispatcher')->dispatchFollowed((new Event())
+                                ->setProviderId(1)
+                                ->setProviderName('Twitter')
+                                ->setStatus(false)
+                                ->setTransctionType(Event::TRANSACTION_FOLLOW)
+                                ->setData(array(
+                                    'tag_id' => $tag['id'],
+                                    'tag_name' => $tag['name'],
+                                    'user_id' => $item->getUserId(),
+                                    'user_name' => $item->getUserName()
+                                ))
+                            );
+                        }
 
-                        $this->container->get('follower_event_dispatcher')->dispatchFollowed(array(
-                            'followed' => $status,
-                            'provider_id' => $provider['id'],
-                            'tag_id' => $tag['id'],
-                            'tag_name' => $tag['name'],
-                            'user_id' => $item->getUserId(),
-                            'user_name' => $item->getUserName()
-                        ));
-
-                        var_dump(array(
-                            'followed' => $status,
-                            'provider_id' => $provider['id'],
-                            'tag_id' => $tag['id'],
-                            'tag_name' => $tag['name'],
-                            'user_id' => $item->getUserId(),
-                            'user_name' => $item->getUserName()
-                        ));
-
-                        sleep($sleepTime);
+                        $this->wrapper->sleep($sleepTime);
                     }
                 } catch ( \Exception $err) {
                     var_dump($err->getMessage());

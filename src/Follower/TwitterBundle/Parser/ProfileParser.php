@@ -81,4 +81,32 @@ class ProfileParser
 
         return $result;
     }
+
+    static function parseFollowers(Crawler $crawler) {
+        $result = new ArrayCollection();
+
+        $minPosition = $crawler->filter('.GridTimeline-items')->count() ?
+            $crawler->filter('.GridTimeline-items')->attr('data-min-position') : null;
+
+        $crawler->filter('.js-stream-item')->each(function (Crawler $node) use ($result) {
+            $userId = $node->filter('.ProfileCard')->first()->attr('data-user-id');
+            $userName = $node->filter('.ProfileCard')->first()->attr('data-screen-name');
+
+            $result->add((new Item())
+                ->setContent(null)
+                ->setFollowing(null)
+                ->setFollowingBack(true)
+                ->setIsTweet(false)
+                ->setIsUser(true)
+                ->setShared(null)
+                ->setUserId($userId)
+                ->setItemId(null)
+                ->setUserName($userName)
+                ->setLiked(null)
+                ->setExtra(array())
+            );
+        });
+
+        return array($result, $minPosition);
+    }
 }

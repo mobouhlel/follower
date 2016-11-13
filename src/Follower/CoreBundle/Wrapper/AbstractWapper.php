@@ -3,6 +3,8 @@
 namespace Follower\CoreBundle\Wrapper;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -44,5 +46,28 @@ abstract class AbstractWapper
         ), array(
             \PDO::PARAM_INT, \PDO::PARAM_BOOL
         ));
+    }
+
+    public function sleep($second) {
+        $consoleOutput = new ConsoleOutput();
+
+        $progress = new ProgressBar((new ConsoleOutput()), $second);
+
+        $progress->setBarWidth(150);
+
+        $progress->setProgressCharacter('>');
+
+        $progress->start();
+
+        $i = 0;
+        while ($i++ < $second) {
+            $progress->advance();
+
+            sleep(1);
+        }
+
+        $progress->finish();
+
+        $consoleOutput->writeln("");
     }
 }

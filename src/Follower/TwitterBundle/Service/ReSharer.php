@@ -10,6 +10,7 @@ namespace Follower\TwitterBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Follower\CoreBundle\Entity\Provider;
+use Follower\CoreBundle\Event\Event;
 use Follower\CoreBundle\Helper\TimeHelper;
 use Follower\CoreBundle\Schema\Item;
 use Follower\CoreBundle\Wrapper\FollowerWrapper;
@@ -67,26 +68,55 @@ class ReSharer
                 try {
                     $result = $profileFactory->getTweets($user['username']);
 
+                    $result = $result->toArray();
                     /** @var Item $item */
                     foreach ($result as $index => $item) {
+                        $item = array_shift($result);
+
                         if(!$item->isShared() && $index < 3) {
-                            $status = $reShare->share($item->getItemId(), $item->getExtra());
+                            if($reShare->share($item->getItemId(), $item->getExtra())) {
+                                $this->container->get('follower_event_dispatcher')->dispatchReShared((new Event())
+                                    ->setProviderId(1)
+                                    ->setProviderName('Twitter')
+                                    ->setStatus(true)
+                                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                                    ->setData(array(
+                                        'item_id' => $item->getItemId(),
+                                        'item_text' => $item->getContent(),
+                                        'user_entity_id' => $user['id'],
+                                        'user_id' => $item->getUserId(),
+                                        'user_name' => $item->getUserName()
+                                    ))
+                                );
+                            } else {
+                                $this->container->get('follower_event_dispatcher')->dispatchReShareFailed((new Event())
+                                    ->setProviderId(1)
+                                    ->setProviderName('Twitter')
+                                    ->setStatus(false)
+                                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                                    ->setData(array(
+                                        'item_id' => $item->getItemId(),
+                                        'item_text' => $item->getContent(),
+                                        'user_id' => $item->getUserId(),
+                                        'user_name' => $item->getUserName()
+                                    ))
+                                );
+                            }
 
-                            $this->container->get('follower_event_dispatcher')->dispatchReShared(array(
-                                'provider_id' => $provider['id'],
-                                'user_id' => $user['id'],
-                                'status' => $status,
-                                'item_id' => $item->getItemId()
-                            ));
-
-                            var_dump(array(
-                                'provider_id' => $provider['id'],
-                                'user_id' => $user['id'],
-                                'status' => $status,
-                                'item_id' => $item->getItemId()
-                            ));
-
-                            sleep(60);
+                            $this->wrapper->sleep(60);
+                        } else {
+                            $this->container->get('follower_event_dispatcher')->dispatchReSharedAlready((new Event())
+                                ->setProviderId(1)
+                                ->setProviderName('Twitter')
+                                ->setStatus(true)
+                                ->setTransctionType(Event::TRANSACTION_LIKE)
+                                ->setData(array(
+                                    'item_id' => $item->getItemId(),
+                                    'item_text' => $item->getContent(),
+                                    'user_id' => $item->getUserId(),
+                                    'user_name' => $item->getUserName()
+                                ))
+                            );
                         }
                     }
                 } catch ( BadRequestHttpException $err) {

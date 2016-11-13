@@ -9,6 +9,7 @@
 namespace Follower\TwitterBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Follower\CoreBundle\Event\Event;
 use Follower\CoreBundle\Wrapper\FollowerWrapper;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -63,25 +64,30 @@ class Unfollower
             if(!$item->isFollowing()) continue;
 
             if($this->getUnfollowFactory()->unfollow($item->getUserId())) {
-                $this->container->get('follower_event_dispatcher')->dispatchUnfollowed(array(
-                    'id' => $follower['id'],
-                    'un_followed' => true,
-                    'provider_id' => 1,
-                    'user_id' => $item->getUserId(),
-                    'user_name' => $item->getUserName()
-                ));
-
-                var_dump(array(
-                    'id' => $follower['id'],
-                    'un_followed' => true,
-                    'provider_id' => 1,
-                    'user_id' => $item->getUserId(),
-                    'user_name' => $item->getUserName()
-                ));
+                $this->container->get('follower_event_dispatcher')->dispatchReShared((new Event())
+                    ->setProviderId(1)
+                    ->setProviderName('Twitter')
+                    ->setStatus(true)
+                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                    ->setData(array(
+                        'user_id' => $item->getUserId(),
+                        'user_name' => $item->getUserName()
+                    ))
+                );
+            } else {
+                $this->container->get('follower_event_dispatcher')->dispatchReShareFailed((new Event())
+                    ->setProviderId(1)
+                    ->setProviderName('Twitter')
+                    ->setStatus(false)
+                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                    ->setData(array(
+                        'user_id' => $item->getUserId(),
+                        'user_name' => $item->getUserName()
+                    ))
+                );
             }
 
-            sleep(60);
-
+            $this->wrapper->sleep(60);
         }
     }
 

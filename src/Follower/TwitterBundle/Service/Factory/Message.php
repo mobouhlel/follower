@@ -13,17 +13,19 @@ use Follower\CoreBundle\Interfaces\LikeInterface;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
 
-class Like extends AbstractService implements LikeInterface
+class Message extends AbstractService
 {
 
     CONST SUCCESS_STATUS = 'following';
 
-    public function like($shareId, $extras = [])
+    public function send($userId, $message,  $extras = [])
     {
         $formData = array(
             'authenticity_token' => $this->getCookieJar()->get('auth_token')->getValue(),
-            'id' => $shareId,
-            'tweet_stat_count' => $extras['tweet_stat_count']
+            'conversation_id' => $userId . '-' . $this->container->getParameter('twitter_id'),
+            'tagged_users' => null,
+            'text' => $message,
+            'tweetboxId' => 'swift_tweetbox_' . (new \DateTime())->getTimestamp() . rand(100, 999),
         );
 
         $this->client->setHeader('accept', 'application/json, text/javascript, */*; q=0.01');
@@ -34,7 +36,7 @@ class Like extends AbstractService implements LikeInterface
         $this->client->setHeader('user-agent', $this->getUserAgent());
         $this->client->setHeader('x-requested-with', 'XMLHttpRequest');
 
-        $this->client->request('POST',$this->getLikeUrl(), $formData, array(), array(
+        $this->client->request('POST',$this->getMessageUrl(), $formData, array(), array(
             'HTTP_USER_AGENT' => $this->getUserAgent()
         ));
 

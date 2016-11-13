@@ -10,6 +10,7 @@ namespace Follower\TwitterBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Follower\CoreBundle\Entity\Provider;
+use Follower\CoreBundle\Event\Event;
 use Follower\CoreBundle\Helper\TimeHelper;
 use Follower\CoreBundle\Schema\Item;
 use Follower\CoreBundle\Wrapper\FollowerWrapper;
@@ -56,8 +57,6 @@ class Liker
 
         $sleepTime = TimeHelper::calculateSleepTime($provider['daily_like']);
 
-        var_dump("sleep time between each request: ". $sleepTime);
-
         /** @var Search $followFactory */
         $searchFactory = $this->getSearchFactory();
 
@@ -72,33 +71,41 @@ class Liker
                     /** @var Item $item */
                     foreach ($result as $item) {
                         if(!$item->isLiked() && $item->isLiked() !== null) {
-                            $status = $likeFactory->like($item->getItemId(), array(
+                            if($likeFactory->like($item->getItemId(), array(
                                 'tweet_stat_count' => $item->getExtra('tweet_stat_count')
-                            ));
+                            ))) {
+                                $this->container->get('follower_event_dispatcher')->dispatchLiked((new Event())
+                                    ->setProviderId(1)
+                                    ->setProviderName('Twitter')
+                                    ->setStatus(true)
+                                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                                    ->setData(array(
+                                        'tag_id' => $tag['id'],
+                                        'tag_name' => $tag['name'],
+                                        'item_id' => $item->getItemId(),
+                                        'item_text' => $item->getContent(),
+                                        'user_id' => $item->getUserId(),
+                                        'user_name' => $item->getUserName()
+                                    ))
+                                );
+                            } else {
+                                $this->container->get('follower_event_dispatcher')->dispatchLikeFailed((new Event())
+                                    ->setProviderId(1)
+                                    ->setProviderName('Twitter')
+                                    ->setStatus(false)
+                                    ->setTransctionType(Event::TRANSACTION_LIKE)
+                                    ->setData(array(
+                                        'tag_id' => $tag['id'],
+                                        'tag_name' => $tag['name'],
+                                        'item_id' => $item->getItemId(),
+                                        'item_text' => $item->getContent(),
+                                        'user_id' => $item->getUserId(),
+                                        'user_name' => $item->getUserName()
+                                    ))
+                                );
+                            }
 
-                            $this->container->get('follower_event_dispatcher')->dispatchLiked(array(
-                                'provider_id' => $provider['id'],
-                                'tag_id' => $tag['id'],
-                                'user_id' => $item->getUserId(),
-                                'user_name' => $item->getUserName(),
-                                'liked' => $status,
-                                'item_id' => $item->getItemId(),
-                                'item_text' => $item->getContent(),
-                                'tag_name' => $tag['name'],
-                            ));
-
-                            var_dump(array(
-                                'provider_id' => $provider['id'],
-                                'tag_id' => $tag['id'],
-                                'user_id' => $item->getUserId(),
-                                'user_name' => $item->getUserName(),
-                                'liked' => $status,
-                                'item_id' => $item->getItemId(),
-                                'item_text' => $item->getContent(),
-                                'tag_name' => $tag['name'],
-                            ));
-
-                            sleep($sleepTime);
+                            $this->wrapper->sleep($sleepTime);
                         }
                     }
                 } catch ( BadRequestHttpException $err) {

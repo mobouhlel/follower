@@ -37,6 +37,13 @@ services:
         calls:
             - [login]
 
+
+    twitter_messagesend_factory:
+        class: Follower\TwitterBundle\Service\Factory\Message
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
     twitter_follower:
         class: Follower\TwitterBundle\Service\Follower
         arguments: ["@service_container"]
@@ -55,4 +62,8 @@ services:
 
     twitter_status_checker:
         class: Follower\TwitterBundle\Service\StatusChecker
+        arguments: ["@service_container"]
+
+    twitter_message_sender:
+        class: Follower\TwitterBundle\Service\MessageSender
         arguments: ["@service_container"]

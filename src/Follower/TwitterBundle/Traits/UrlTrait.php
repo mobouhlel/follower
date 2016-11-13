@@ -57,6 +57,16 @@ trait UrlTrait
     /**
      * @var string
      */
+    private $followers = 'https://twitter.com/followers';
+
+    /**
+     * @var string
+     */
+    private $followersPagination = 'https://twitter.com/{username}/followers/users?include_available_features=1&include_entities=1&max_position={max_position}&reset_error_state=false';
+
+    /**
+     * @var string
+     */
     private $reshare = 'https://twitter.com/i/tweet/retweet';
 
     /**
@@ -135,6 +145,25 @@ trait UrlTrait
     public function getReShareUrl()
     {
         return $this->reshare;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFollowersUrl()
+    {
+        return $this->followers;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFollowersPaginationUrl($username, $maxPosition)
+    {
+        $url = str_replace("{username}", $username, $this->followersPagination);
+        $url = str_replace("{max_position}", $maxPosition, $url);
+
+        return $url;
     }
 
     /**

@@ -1,10 +1,13 @@
 <?php
 
 namespace Follower\TwitterBundle\Service;
+use Follower\CoreBundle\Event\Event;
 use Follower\TwitterBundle\Traits\ParameterTrait;
 use Follower\TwitterBundle\Traits\RequestTrait;
 use Follower\TwitterBundle\Traits\UrlTrait;
 use Goutte\Client;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -43,8 +46,18 @@ class AbstractService
 
     public function login()
     {
-        if ($this->loggedIn())
+        if ($this->loggedIn()) {
+            $this->container->get('follower_event_dispatcher')->dispatchAlreadyLoggedIn((new Event())
+                ->setProviderId(1)
+                ->setProviderName('Twitter')
+                ->setStatus(true)
+                ->setTransctionType(Event::TRANSACTION_LOGIN)
+                ->setData(array(
+                ))
+            );
+
             return true;
+        }
 
         $crawler = $this->client->request('GET', $this->getLoginUrl());
 
@@ -55,8 +68,27 @@ class AbstractService
 
         $result = $this->client->submit($loginForm);
 
-        if(!$this->loggedIn($result->html()))
+        if(!$this->loggedIn($result->html())) {
+            $this->container->get('follower_event_dispatcher')->dispatchLoginFailed((new Event())
+                ->setProviderId(1)
+                ->setProviderName('Twitter')
+                ->setStatus(false)
+                ->setTransctionType(Event::TRANSACTION_LOGIN)
+                ->setData(array(
+                ))
+            );
+
             throw new \Exception('Login failed');
+        } else {
+            $this->container->get('follower_event_dispatcher')->dispatchLoggedIn((new Event())
+                ->setProviderId(1)
+                ->setProviderName('Twitter')
+                ->setStatus(true)
+                ->setTransctionType(Event::TRANSACTION_LOGIN)
+                ->setData(array(
+                ))
+            );
+        }
 
         $this->saveCookie();
     }
