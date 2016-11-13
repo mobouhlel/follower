@@ -12,14 +12,11 @@ namespace Follower\TwitterBundle\Service\Factory;
 use Follower\CoreBundle\Interfaces\LikeInterface;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Like extends AbstractService implements LikeInterface
 {
-    CONST SUCCESS_STATUS = 'following';
 
-    CONST HEADER_BLOCKED= '429 Too Many Requests';
+    CONST SUCCESS_STATUS = 'following';
 
     public function like($shareId, $extras = [])
     {
@@ -44,8 +41,7 @@ class Like extends AbstractService implements LikeInterface
         /** @var Response $response */
         $response = $this->client->getResponse();
 
-        if($response->getHeader('status') === self::HEADER_BLOCKED)
-            throw new BadRequestHttpException(self::HEADER_BLOCKED);
+        json_decode($response->getContent(), true);
 
         return true;
     }

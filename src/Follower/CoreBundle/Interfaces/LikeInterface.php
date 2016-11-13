@@ -10,5 +10,5 @@ namespace Follower\CoreBundle\Interfaces;
  */
 interface LikeInterface
 {
-    public function like($shareId);
+    public function like($shareId, $extras = []);
 }

@@ -5,13 +5,13 @@ namespace Follower\CoreBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Follow
+ * Like
  *
- * @ORM\Table(name="follow")
+ * @ORM\Table(name="likes")
  * @ORM\HasLifecycleCallbacks
- * @ORM\Entity(repositoryClass="Follower\CoreBundle\Repository\FollowRepository")
+ * @ORM\Entity(repositoryClass="Follower\CoreBundle\Repository\LikeRepository")
  */
-class Follow
+class Like
 {
     /**
      * @var int
@@ -23,16 +23,30 @@ class Follow
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Provider", inversedBy="follows")
+     * @ORM\ManyToOne(targetEntity="Provider", inversedBy="likes")
      * @ORM\JoinColumn(name="provider_id", referencedColumnName="id")
      */
     private $provider;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tag", inversedBy="follows")
+     * @ORM\ManyToOne(targetEntity="Tag", inversedBy="likes")
      * @ORM\JoinColumn(name="tag_id", referencedColumnName="id", nullable=TRUE)
      */
     private $tag;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="item_id", type="string", length=255, nullable=TRUE)
+     */
+    private $itemId;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="item_text", type="string", length=255, nullable=TRUE)
+     */
+    private $itemText;
 
     /**
      * @var string
@@ -51,16 +65,9 @@ class Follow
     /**
      * @var bool
      *
-     * @ORM\Column(name="followed", type="boolean", nullable=TRUE)
+     * @ORM\Column(name="liked", type="boolean", nullable=true)
      */
-    private $followed = false;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="blocked", type="boolean", nullable=true, nullable=TRUE)
-     */
-    private $blocked;
+    private $liked;
 
     /**
      * @var \DateTime
@@ -77,6 +84,20 @@ class Follow
     private $updatedAt;
 
     /**
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function updatedTimestamps()
+    {
+        $this->setUpdatedAt(new \DateTime('now'));
+
+        if ($this->getCreatedAt() == null) {
+            $this->setCreatedAt(new \DateTime('now'));
+        }
+    }
+
+    /**
      * Get id
      *
      * @return integer 
@@ -87,15 +108,56 @@ class Follow
     }
 
     /**
-     * @return string
+     * Set itemId
+     *
+     * @param string $itemId
+     * @return Like
      */
-    public function getUserId()
+    public function setItemId($itemId)
     {
-        return $this->userId;
+        $this->itemId = $itemId;
+
+        return $this;
     }
 
     /**
+     * Get itemId
+     *
+     * @return string 
+     */
+    public function getItemId()
+    {
+        return $this->itemId;
+    }
+
+    /**
+     * Set itemText
+     *
+     * @param string $itemText
+     * @return Like
+     */
+    public function setItemText($itemText)
+    {
+        $this->itemText = $itemText;
+
+        return $this;
+    }
+
+    /**
+     * Get itemText
+     *
+     * @return string 
+     */
+    public function getItemText()
+    {
+        return $this->itemText;
+    }
+
+    /**
+     * Set userId
+     *
      * @param string $userId
+     * @return Like
      */
     public function setUserId($userId)
     {
@@ -105,15 +167,20 @@ class Follow
     }
 
     /**
-     * @return string
+     * Get userId
+     *
+     * @return string 
      */
-    public function getUserName()
+    public function getUserId()
     {
-        return $this->userName;
+        return $this->userId;
     }
 
     /**
+     * Set userName
+     *
      * @param string $userName
+     * @return Like
      */
     public function setUserName($userName)
     {
@@ -122,53 +189,44 @@ class Follow
         return $this;
     }
 
-
     /**
-     * @return boolean
-     */
-    public function isFollowed()
-    {
-        return $this->followed;
-    }
-
-    /**
-     * @param boolean $followed
-     */
-    public function setFollowed($followed)
-    {
-        $this->followed = $followed;
-
-        return $this;
-    }
-
-    /**
-     * Set blocked
+     * Get userName
      *
-     * @param boolean $blocked
-     * @return Follow
+     * @return string 
      */
-    public function setBlocked($blocked)
+    public function getUserName()
     {
-        $this->blocked = $blocked;
+        return $this->userName;
+    }
+
+    /**
+     * Set liked
+     *
+     * @param boolean $liked
+     * @return Like
+     */
+    public function setLiked($liked)
+    {
+        $this->liked = $liked;
 
         return $this;
     }
 
     /**
-     * Get blocked
+     * Get liked
      *
      * @return boolean 
      */
-    public function getBlocked()
+    public function getLiked()
     {
-        return $this->blocked;
+        return $this->liked;
     }
 
     /**
      * Set createdAt
      *
      * @param \DateTime $createdAt
-     * @return Follow
+     * @return Like
      */
     public function setCreatedAt($createdAt)
     {
@@ -191,7 +249,7 @@ class Follow
      * Set updatedAt
      *
      * @param \DateTime $updatedAt
-     * @return Follow
+     * @return Like
      */
     public function setUpdatedAt($updatedAt)
     {
@@ -214,7 +272,7 @@ class Follow
      * Set provider
      *
      * @param \Follower\CoreBundle\Entity\Provider $provider
-     * @return Follow
+     * @return Like
      */
     public function setProvider(\Follower\CoreBundle\Entity\Provider $provider = null)
     {
@@ -237,7 +295,7 @@ class Follow
      * Set tag
      *
      * @param \Follower\CoreBundle\Entity\Tag $tag
-     * @return Follow
+     * @return Like
      */
     public function setTag(\Follower\CoreBundle\Entity\Tag $tag = null)
     {
@@ -254,29 +312,5 @@ class Follow
     public function getTag()
     {
         return $this->tag;
-    }
-
-    /**
-     *
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     */
-    public function updatedTimestamps()
-    {
-        $this->setUpdatedAt(new \DateTime('now'));
-
-        if ($this->getCreatedAt() == null) {
-            $this->setCreatedAt(new \DateTime('now'));
-        }
-    }
-
-    /**
-     * Get followed
-     *
-     * @return boolean 
-     */
-    public function getFollowed()
-    {
-        return $this->followed;
     }
 }

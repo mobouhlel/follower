@@ -37,4 +37,12 @@ abstract class AbstractWapper
             \PDO::PARAM_INT
         ));
     }
+
+    public function getActiveTags($providerId) {
+        return $this->connection->fetchAll('select * from tag where provider_id = ? and status = ?', array(
+            $providerId, true
+        ), array(
+            \PDO::PARAM_INT, \PDO::PARAM_BOOL
+        ));
+    }
 }

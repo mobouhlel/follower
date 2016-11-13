@@ -10,5 +10,11 @@ namespace Follower\CoreBundle\Wrapper;
  */
 class UnfollowerWrapper extends AbstractWapper
 {
-
+    public function getFollows($providerId) {
+        return $this->connection->fetchAll('select * from follow where provider_id = ? and followed = ?', array(
+            $providerId, true
+        ), array(
+            \PDO::PARAM_INT, \PDO::PARAM_BOOL
+        ));
+    }
 }

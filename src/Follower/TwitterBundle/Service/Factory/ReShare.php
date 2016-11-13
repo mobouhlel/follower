@@ -8,25 +8,22 @@
 
 namespace Follower\TwitterBundle\Service\Factory;
 
-
-use Follower\CoreBundle\Interfaces\LikeInterface;
+use Follower\CoreBundle\Interfaces\FollowInterface;
+use Follower\TwitterBundle\Parser\ProfileParser;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class Like extends AbstractService implements LikeInterface
+class ReShare extends AbstractService
 {
-    CONST SUCCESS_STATUS = 'following';
-
     CONST HEADER_BLOCKED= '429 Too Many Requests';
 
-    public function like($shareId, $extras = [])
-    {
+    public function share($itemId, $extras = [])
+{
         $formData = array(
             'authenticity_token' => $this->getCookieJar()->get('auth_token')->getValue(),
-            'id' => $shareId,
-            'tweet_stat_count' => $extras['tweet_stat_count']
+            'id' => $itemId,
+            'tweet_stat_count' => $extras['tweet_share_stat_count']
         );
 
         $this->client->setHeader('accept', 'application/json, text/javascript, */*; q=0.01');
@@ -37,7 +34,7 @@ class Like extends AbstractService implements LikeInterface
         $this->client->setHeader('user-agent', $this->getUserAgent());
         $this->client->setHeader('x-requested-with', 'XMLHttpRequest');
 
-        $this->client->request('POST',$this->getLikeUrl(), $formData, array(), array(
+        $this->client->request('POST',$this->getReShareUrl(), $formData, array(), array(
             'HTTP_USER_AGENT' => $this->getUserAgent()
         ));
 

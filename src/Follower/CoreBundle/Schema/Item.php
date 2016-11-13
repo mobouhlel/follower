@@ -13,6 +13,9 @@ class Item
     /** @var  integer $userId */
     protected $userId;
 
+    /** @var  integer $itemId */
+    protected $itemId;
+
     /** @var  string $userName */
     protected $userName;
 
@@ -30,6 +33,15 @@ class Item
 
     /** @var  boolean $userIsFollowingBack */
     protected $isTweet;
+
+    /** @var  boolean $liked */
+    protected $liked;
+
+    /** @var  boolean $shared */
+    protected $shared;
+
+    /** @var  array $extra */
+    protected $extra;
 
     /**
      * @return int
@@ -153,6 +165,81 @@ class Item
     public function setIsTweet($isTweet)
     {
         $this->isTweet = $isTweet;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getItemId()
+    {
+        return $this->itemId;
+    }
+
+    /**
+     * @param int $itemId
+     */
+    public function setItemId($itemId)
+    {
+        $this->itemId = $itemId;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isLiked()
+    {
+        return $this->liked;
+    }
+
+    /**
+     * @param boolean $liked
+     */
+    public function setLiked($liked)
+    {
+        $this->liked = $liked;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtra($key = null)
+    {
+        if($key)
+            return isset($this->extra[$key]) ? $this->extra[$key] : null;
+
+        return $this->extra;
+    }
+
+    /**
+     * @param array $extra
+     */
+    public function setExtra($extra)
+    {
+        $this->extra = $extra;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isShared()
+    {
+        return $this->shared;
+    }
+
+    /**
+     * @param boolean $shared
+     */
+    public function setShared($shared)
+    {
+        $this->shared = $shared;
 
         return $this;
     }

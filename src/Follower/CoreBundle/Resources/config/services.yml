@@ -30,3 +30,8 @@ services:
         class: Follower\CoreBundle\Wrapper\UnlikerWrapper
         arguments:
             - "@service_container"
+
+    core_reshare_wrapper:
+        class: Follower\CoreBundle\Wrapper\ReShareWrapper
+        arguments:
+            - "@service_container"

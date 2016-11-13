@@ -19,10 +19,10 @@ use Follower\TwitterBundle\Service\Factory\Search;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
- * Class Follower
+ * Class MessageSender
  * @package Follower\TwitterBundle\Service
  */
-class Follower
+class MessageSender
 {
     /** @var  Container $container */
     protected $container;
@@ -46,7 +46,7 @@ class Follower
         $this->wrapper = $container->get('core_follower_wrapper');
     }
 
-    public function follow()
+    public function send()
     {
         /** @var Provider $provider */
         $provider = $this->wrapper->getProvider(1);

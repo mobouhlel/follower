@@ -62,6 +62,11 @@ class Provider
     private $tags;
 
     /**
+     * @ORM\OneToMany(targetEntity="Like", mappedBy="provider")
+     */
+    private $likes;
+
+    /**
      * @ORM\OneToMany(targetEntity="Follow", mappedBy="provider")
      */
     private $follows;
@@ -263,5 +268,38 @@ class Provider
     public function getFollows()
     {
         return $this->follows;
+    }
+
+    /**
+     * Add likes
+     *
+     * @param \Follower\CoreBundle\Entity\Like $likes
+     * @return Provider
+     */
+    public function addLike(\Follower\CoreBundle\Entity\Like $likes)
+    {
+        $this->likes[] = $likes;
+
+        return $this;
+    }
+
+    /**
+     * Remove likes
+     *
+     * @param \Follower\CoreBundle\Entity\Like $likes
+     */
+    public function removeLike(\Follower\CoreBundle\Entity\Like $likes)
+    {
+        $this->likes->removeElement($likes);
+    }
+
+    /**
+     * Get likes
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getLikes()
+    {
+        return $this->likes;
     }
 }

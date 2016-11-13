@@ -33,6 +33,11 @@ class FollowerEventDispatcher
         $this->dispatcher->dispatch(FollowerEventListener::LIKED, (new Event($data)));
     }
 
+    public function dispatchReShared(array $data)
+    {
+        $this->dispatcher->dispatch(FollowerEventListener::RESHARED, (new Event($data)));
+    }
+
     public function dispatchUnliked(array $data)
     {
         $this->dispatcher->dispatch(FollowerEventListener::UNLIKED, (new Event($data)));

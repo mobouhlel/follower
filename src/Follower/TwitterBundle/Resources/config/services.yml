@@ -1,24 +1,38 @@
 services:
-    twitter_like:
+    twitter_like_factory:
         class: Follower\TwitterBundle\Service\Factory\Like
         arguments: ["@service_container"]
         calls:
             - [login]
 
-    twitter_follow:
+    twitter_follow_factory:
         class: Follower\TwitterBundle\Service\Factory\Follow
         arguments: ["@service_container"]
         calls:
             - [login]
 
-    twitter_unfollow:
+    twitter_unfollow_factory:
         class: Follower\TwitterBundle\Service\Factory\Unfollow
         arguments: ["@service_container"]
         calls:
             - [login]
 
-    twitter_search:
+    twitter_search_factory:
         class: Follower\TwitterBundle\Service\Factory\Search
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+
+    twitter_profile_factory:
+        class: Follower\TwitterBundle\Service\Factory\Profile
+        arguments: ["@service_container"]
+        calls:
+            - [login]
+
+
+    twitter_reshare_factory:
+        class: Follower\TwitterBundle\Service\Factory\ReShare
         arguments: ["@service_container"]
         calls:
             - [login]
@@ -26,6 +40,19 @@ services:
     twitter_follower:
         class: Follower\TwitterBundle\Service\Follower
         arguments: ["@service_container"]
+
     twitter_unfollower:
         class: Follower\TwitterBundle\Service\Unfollower
+        arguments: ["@service_container"]
+
+    twitter_liker:
+        class: Follower\TwitterBundle\Service\Liker
+        arguments: ["@service_container"]
+
+    twitter_resharer:
+        class: Follower\TwitterBundle\Service\ReSharer
+        arguments: ["@service_container"]
+
+    twitter_status_checker:
+        class: Follower\TwitterBundle\Service\StatusChecker
         arguments: ["@service_container"]

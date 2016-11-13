@@ -37,7 +37,27 @@ trait UrlTrait
     /**
      * @var string
      */
+    private $unfollow = 'https://twitter.com/i/user/unfollow';
+
+    /**
+     * @var string
+     */
+    private $like = 'https://twitter.com/i/tweet/like';
+
+    /**
+     * @var string
+     */
     private $profile = 'https://twitter.com/{username}';
+
+    /**
+     * @var string
+     */
+    private $message = 'https://twitter.com/i/direct_messages/new';
+
+    /**
+     * @var string
+     */
+    private $reshare = 'https://twitter.com/i/tweet/retweet';
 
     /**
      * @var string
@@ -88,7 +108,39 @@ trait UrlTrait
     /**
      * @return string
      */
-    public function getProfile($username)
+    public function getUnfollowUrl()
+    {
+        return $this->unfollow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessageUrl()
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLikeUrl()
+    {
+        return $this->like;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReShareUrl()
+    {
+        return $this->reshare;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProfileUrl($username)
     {
         return str_replace("{username}", $username, $this->profile);
     }
