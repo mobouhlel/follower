@@ -301,7 +301,7 @@ class FollowerEventListener implements EventSubscriberInterface
      */
     public function onReSharedAlready(Event $event)
     {
-//        $this->log('info', __FUNCTION__, $event);
+        $this->log('info', __FUNCTION__, $event);
     }
 
     /**

@@ -12,10 +12,12 @@ namespace Follower\TwitterBundle\Service\Factory;
 use Follower\CoreBundle\Interfaces\FollowInterface;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Follow extends AbstractService implements FollowInterface
 {
     CONST SUCCESS_STATUS = 'following';
+    CONST HEADER_BLOCKED= '400 Bad Request';
 
     public function follow($userId)
     {
@@ -41,6 +43,10 @@ class Follow extends AbstractService implements FollowInterface
 
         /** @var Response $response */
         $response = $this->client->getResponse();
+
+        if($response->getHeader('status') === self::HEADER_BLOCKED)
+            throw new BadRequestHttpException(self::HEADER_BLOCKED);
+
 
         $result = json_decode($response->getContent(), true);
 

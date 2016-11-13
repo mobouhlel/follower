@@ -18,6 +18,7 @@ use Follower\TwitterBundle\Service\Factory\Follow;
 use Follower\TwitterBundle\Service\Factory\Like;
 use Follower\TwitterBundle\Service\Factory\Search;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Class Follower
@@ -115,6 +116,8 @@ class Follower
 
                         $this->wrapper->sleep($sleepTime);
                     }
+                } catch ( BadRequestHttpException $err) {
+                    throw $err;
                 } catch ( \Exception $err) {
                     var_dump($err->getMessage());
                 }

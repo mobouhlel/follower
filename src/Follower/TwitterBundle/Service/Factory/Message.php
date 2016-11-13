@@ -8,10 +8,10 @@
 
 namespace Follower\TwitterBundle\Service\Factory;
 
-
 use Follower\CoreBundle\Interfaces\LikeInterface;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Message extends AbstractService
 {
@@ -45,6 +45,10 @@ class Message extends AbstractService
 
         json_decode($response->getContent(), true);
 
+        if($response->getStatus() != 200)
+            throw new BadRequestHttpException(
+                'Invalid response code: ' . $response->getStatus() . ', headers: ' . json_encode($response->getHeaders())
+            );
         return true;
     }
 }

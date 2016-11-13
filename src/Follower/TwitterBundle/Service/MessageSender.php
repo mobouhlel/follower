@@ -62,6 +62,8 @@ class MessageSender
 
         $followers = $profileFactory->getFollowers('ultraultraslan1');
 
+        $message = 'Bizi takip ettiğiniz için teşekkür ederiz.';
+
         /** @var Item $follower */
         foreach ($followers as $follower) {
             if($this->wrapper->sendBefore($provider['id'], $follower->getUserId(), $follower->getUserName())) {
@@ -78,7 +80,7 @@ class MessageSender
                 continue;
             }
 
-            if($messageFactory->send('1419946626', 'nabersin')) {
+            if($messageFactory->send($follower->getUserId(), $message)) {
                 $this->container->get('follower_event_dispatcher')->dispatchMessageSent((new Event())
                     ->setProviderId(1)
                     ->setProviderName('Twitter')
@@ -101,6 +103,8 @@ class MessageSender
                     ))
                 );
             }
+
+            $this->wrapper->sleep(60);
         }
     }
 
