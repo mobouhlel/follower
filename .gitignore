@@ -10,3 +10,8 @@
 /vendor/
 /bin/
 /composer.phar
+################## idea 
+*.iml
+*.ipr
+*.iws
+.idea/
