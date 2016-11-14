@@ -1,4 +1,10 @@
-twitter-crawler
+Social Bot without api (Only twitter implemented)
 ===============
 
-A Symfony project created on November 11, 2016, 6:53 pm.
+Like   
+ReShare   
+Follow   
+Unfollow   
+Send Direct Message 
+
+All of them implemented for Twitter.
