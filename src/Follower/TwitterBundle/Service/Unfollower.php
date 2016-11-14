@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class Unfollower
 {
-    CONST UNFOLLOW_AFTER = '+3 day';
+    CONST UNFOLLOW_AFTER = '+4 day';
 
     /** @var  Container $container */
     protected $container;
