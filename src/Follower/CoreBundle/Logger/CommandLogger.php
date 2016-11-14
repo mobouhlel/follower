@@ -17,7 +17,7 @@ class CommandLogger implements LoggerInterface
     /** @var  ConsoleOutput $output */
     protected $output;
 
-    CONST COLORS = [
+    static $COLORS = [
         'EMERGENCY' => 'red',
         'ALERT' => 'red',
         'CRITICAL' => 'red',
@@ -29,7 +29,7 @@ class CommandLogger implements LoggerInterface
         'DEBUG' => 'gray',
     ];
 
-    CONST FONT_WEIGHTS = [
+    static $FONT_WEIGHTS = [
         'EMERGENCY' => 'bold',
         'ALERT' => 'bold',
         'CRITICAL' => 'bold',
@@ -194,6 +194,6 @@ class CommandLogger implements LoggerInterface
     {
         $message = '[' . $level . '] [' . date('Y-m-d H:i:s') . ']' . $message . ' ' . json_encode($context);
 
-        $this->output->writeln("<fg=" . self::COLORS[$level] . ";options=" . self::FONT_WEIGHTS[$level] . ">$message</>");
+        $this->output->writeln("<fg=" . self::$COLORS[$level] . ";options=" . self::$FONT_WEIGHTS[$level] . ">$message</>");
     }
 }
