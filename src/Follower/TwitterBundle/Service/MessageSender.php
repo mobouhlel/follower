@@ -61,58 +61,62 @@ class MessageSender
         /** @var Profile $followFactory */
         $profileFactory = $this->getProfileFactory();
 
-        $followers = $profileFactory->getFollowers('ultraultraslan1');
 
         $message = 'Bizi takip ettiğiniz için teşekkür ederiz. ';
 
-        /** @var Item $follower */
-        foreach ($followers as $follower) {
-            try {
-                if ($this->wrapper->sendBefore($provider['id'], $follower->getUserId(), $follower->getUserName())) {
-                    $this->container->get('follower_event_dispatcher')->dispatchMessageSentAlready((new Event())
-                        ->setProviderId(1)
-                        ->setProviderName('Twitter')
-                        ->setStatus(true)
-                        ->setTransctionType(Event::TRANSACTION_MESSAGE)
-                        ->setData(array(
-                            'user_id' => $follower->getUserId(),
-                            'user_name' => $follower->getUserName()
-                        ))
-                    );
-                    continue;
+        while (true) {
+            $followers = $profileFactory->getFollowers('ultraultraslan1');
+            /** @var Item $follower */
+            foreach ($followers as $follower) {
+                try {
+                    if ($this->wrapper->sendBefore($provider['id'], $follower->getUserId(), $follower->getUserName())) {
+                        $this->container->get('follower_event_dispatcher')->dispatchMessageSentAlready((new Event())
+                            ->setProviderId(1)
+                            ->setProviderName('Twitter')
+                            ->setStatus(true)
+                            ->setTransctionType(Event::TRANSACTION_MESSAGE)
+                            ->setData(array(
+                                'user_id' => $follower->getUserId(),
+                                'user_name' => $follower->getUserName()
+                            ))
+                        );
+                        continue;
+                    }
+
+                    if ($messageFactory->send($follower->getUserId(), $message)) {
+                        $this->container->get('follower_event_dispatcher')->dispatchMessageSent((new Event())
+                            ->setProviderId(1)
+                            ->setProviderName('Twitter')
+                            ->setStatus(true)
+                            ->setTransctionType(Event::TRANSACTION_MESSAGE)
+                            ->setData(array(
+                                'user_id' => $follower->getUserId(),
+                                'user_name' => $follower->getUserName()
+                            ))
+                        );
+                    } else {
+                        $this->container->get('follower_event_dispatcher')->dispatchMessageSendFailed((new Event())
+                            ->setProviderId(1)
+                            ->setProviderName('Twitter')
+                            ->setStatus(false)
+                            ->setTransctionType(Event::TRANSACTION_MESSAGE)
+                            ->setData(array(
+                                'user_id' => $follower->getUserId(),
+                                'user_name' => $follower->getUserName()
+                            ))
+                        );
+                    }
+                } catch (BadRequestHttpException $err) {
+                    var_dump($err->getMessage());
+                    $this->wrapper->sleep(60*60*6);
+                } catch (\Exception $err) {
+                    var_dump($err->getMessage());
                 }
 
-                if ($messageFactory->send($follower->getUserId(), $message)) {
-                    $this->container->get('follower_event_dispatcher')->dispatchMessageSent((new Event())
-                        ->setProviderId(1)
-                        ->setProviderName('Twitter')
-                        ->setStatus(true)
-                        ->setTransctionType(Event::TRANSACTION_MESSAGE)
-                        ->setData(array(
-                            'user_id' => $follower->getUserId(),
-                            'user_name' => $follower->getUserName()
-                        ))
-                    );
-                } else {
-                    $this->container->get('follower_event_dispatcher')->dispatchMessageSendFailed((new Event())
-                        ->setProviderId(1)
-                        ->setProviderName('Twitter')
-                        ->setStatus(false)
-                        ->setTransctionType(Event::TRANSACTION_MESSAGE)
-                        ->setData(array(
-                            'user_id' => $follower->getUserId(),
-                            'user_name' => $follower->getUserName()
-                        ))
-                    );
-                }
-            } catch (BadRequestHttpException $err) {
-                var_dump($err->getMessage());
-                sleep(60*60*6);
-            } catch (\Exception $err) {
-                var_dump($err->getMessage());
+                $this->wrapper->sleep(60);
             }
 
-            $this->wrapper->sleep(60);
+            $this->wrapper->sleep(60*60*1);
         }
     }
 

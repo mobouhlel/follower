@@ -110,11 +110,14 @@ class Liker
                     }
                 } catch ( BadRequestHttpException $err) {
                     var_dump($err->getMessage());
-                    sleep(60*60*6);
+                    $this->wrapper->sleep(60*60*6);
                 } catch ( \Exception $err) {
                     var_dump($err->getMessage());
                 }
             }
+
+
+            $this->wrapper->sleep(60*60*1);
         }
     }
 

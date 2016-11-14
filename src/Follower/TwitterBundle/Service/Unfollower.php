@@ -51,51 +51,55 @@ class Unfollower
 
         $current = new \DateTime();
 
-        foreach ($followers as $follower) {
-            try {
-                if (!$follower['user_name']) continue;
+        while(true) {
+            foreach ($followers as $follower) {
+                try {
+                    if (!$follower['user_name']) continue;
 
-                $unfollowTime = (new \DateTime($follower['createdAt']))->modify(self::UNFOLLOW_AFTER);
+                    $unfollowTime = (new \DateTime($follower['createdAt']))->modify(self::UNFOLLOW_AFTER);
 
-                if ($current < $unfollowTime) continue;
+                    if ($current < $unfollowTime) continue;
 
-                $item = $this->getProfileFactory()->profile($follower['user_name']);
+                    $item = $this->getProfileFactory()->profile($follower['user_name']);
 
-                if ($item->isFollowingBack()) continue;
+                    if ($item->isFollowingBack()) continue;
 
-                if(!$item->isFollowing()) continue;
+                    if(!$item->isFollowing()) continue;
 
-                if($this->getUnfollowFactory()->unfollow($item->getUserId())) {
-                    $this->container->get('follower_event_dispatcher')->dispatchReShared((new Event())
-                        ->setProviderId(1)
-                        ->setProviderName('Twitter')
-                        ->setStatus(true)
-                        ->setTransctionType(Event::TRANSACTION_LIKE)
-                        ->setData(array(
-                            'user_id' => $item->getUserId(),
-                            'user_name' => $item->getUserName()
-                        ))
-                    );
-                } else {
-                    $this->container->get('follower_event_dispatcher')->dispatchReShareFailed((new Event())
-                        ->setProviderId(1)
-                        ->setProviderName('Twitter')
-                        ->setStatus(false)
-                        ->setTransctionType(Event::TRANSACTION_LIKE)
-                        ->setData(array(
-                            'user_id' => $item->getUserId(),
-                            'user_name' => $item->getUserName()
-                        ))
-                    );
+                    if($this->getUnfollowFactory()->unfollow($item->getUserId())) {
+                        $this->container->get('follower_event_dispatcher')->dispatchReShared((new Event())
+                            ->setProviderId(1)
+                            ->setProviderName('Twitter')
+                            ->setStatus(true)
+                            ->setTransctionType(Event::TRANSACTION_LIKE)
+                            ->setData(array(
+                                'user_id' => $item->getUserId(),
+                                'user_name' => $item->getUserName()
+                            ))
+                        );
+                    } else {
+                        $this->container->get('follower_event_dispatcher')->dispatchReShareFailed((new Event())
+                            ->setProviderId(1)
+                            ->setProviderName('Twitter')
+                            ->setStatus(false)
+                            ->setTransctionType(Event::TRANSACTION_LIKE)
+                            ->setData(array(
+                                'user_id' => $item->getUserId(),
+                                'user_name' => $item->getUserName()
+                            ))
+                        );
+                    }
+                } catch (BadRequestHttpException $err) {
+                    var_dump($err->getMessage());
+                    $this->wrapper->sleep(60*60*6);
+                } catch (\Exception $err) {
+                    var_dump($err->getMessage());
                 }
-            } catch (BadRequestHttpException $err) {
-                var_dump($err->getMessage());
-                sleep(60*60*6);
-            } catch (\Exception $err) {
-                var_dump($err->getMessage());
+
+                $this->wrapper->sleep(60);
             }
 
-            $this->wrapper->sleep(60);
+            $this->wrapper->sleep(60*60*24);
         }
     }
 
