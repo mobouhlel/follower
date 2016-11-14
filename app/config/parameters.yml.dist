@@ -11,5 +11,6 @@ parameters:
     mailer_password: null
     secret: 5d1d3e378c999ea49d96c23098f67305189e3390
 
+    twitter_id: ~
     twitter_username: ~
     twitter_password: ~
