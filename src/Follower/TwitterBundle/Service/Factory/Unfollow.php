@@ -12,6 +12,7 @@ namespace Follower\TwitterBundle\Service\Factory;
 use Follower\CoreBundle\Interfaces\UnfollowInterface;
 use Follower\TwitterBundle\Service\AbstractService;
 use Symfony\Component\BrowserKit\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Unfollow extends AbstractService implements UnfollowInterface
 {
@@ -40,6 +41,11 @@ class Unfollow extends AbstractService implements UnfollowInterface
 
         /** @var Response $response */
         $response = $this->client->getResponse();
+
+        if($response->getStatus() != 200)
+            throw new BadRequestHttpException(
+                'Invalid response code: ' . $response->getStatus() . ', headers: ' . json_encode($response->getHeaders())
+            );
 
         $result = json_decode($response->getContent(), true);
 

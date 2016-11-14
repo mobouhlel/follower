@@ -117,7 +117,8 @@ class Follower
                         $this->wrapper->sleep($sleepTime);
                     }
                 } catch ( BadRequestHttpException $err) {
-                    throw $err;
+                    var_dump($err->getMessage());
+                    sleep(60*60*6);
                 } catch ( \Exception $err) {
                     var_dump($err->getMessage());
                 }

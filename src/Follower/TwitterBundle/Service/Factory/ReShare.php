@@ -44,6 +44,11 @@ class ReShare extends AbstractService
         if($response->getHeader('status') === self::HEADER_BLOCKED)
             throw new BadRequestHttpException(self::HEADER_BLOCKED);
 
+        if($response->getStatus() != 200)
+            throw new BadRequestHttpException(
+                'Invalid response code: ' . $response->getStatus() . ', headers: ' . json_encode($response->getHeaders())
+            );
+
         return true;
     }
 }
