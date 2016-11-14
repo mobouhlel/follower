@@ -1,6 +1,7 @@
 <?php
 
 namespace Follower\TwitterBundle\Service;
+
 use Follower\CoreBundle\Event\Event;
 use Follower\TwitterBundle\Traits\ParameterTrait;
 use Follower\TwitterBundle\Traits\RequestTrait;
@@ -61,10 +62,19 @@ class AbstractService
 
         $crawler = $this->client->request('GET', $this->getLoginUrl());
 
-        $loginForm = $crawler->selectButton("Giriş yap")->form(array(
-            'session[username_or_email]' => $this->getUsername(),
-            'session[password]' => $this->getPassword()
-        ));
+        if($crawler->selectButton("Giriş yap")->count()) {
+            $loginForm = $crawler->selectButton("Giriş yap")->form(array(
+                'session[username_or_email]' => $this->getUsername(),
+                'session[password]' => $this->getPassword()
+            ));
+        } elseif ($crawler->selectButton("Inloggen")->count()) {
+            $loginForm = $crawler->selectButton("Inloggen")->form(array(
+                'session[username_or_email]' => $this->getUsername(),
+                'session[password]' => $this->getPassword()
+            ));
+        } else {
+            throw new \Exception('Login form not found');
+        }
 
         $result = $this->client->submit($loginForm);
 
