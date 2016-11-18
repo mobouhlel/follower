@@ -21,4 +21,6 @@ class LikeCommand extends ContainerAwareCommand
 
         $container->get('twitter_liker')->like();
     }
+
+   // nohup app/console twitter:like:command > logs/twitter.like.command & nohup app/console twitter:follow:command > logs/twitter.follow.command &  nohup app/console twitter:unfollow:command > logs/twitter.unfollow.command & nohup app/console twitter:reshare:command > logs/twitter.reshare.command &  nohup app/console twitter:messagesender:command > logs/twitter.messagesender.command &
 }

@@ -67,22 +67,22 @@ class Unfollower
                     if(!$item->isFollowing()) continue;
 
                     if($this->getUnfollowFactory()->unfollow($item->getUserId())) {
-                        $this->container->get('follower_event_dispatcher')->dispatchReShared((new Event())
+                        $this->container->get('follower_event_dispatcher')->dispatchUnfollowed((new Event())
                             ->setProviderId(1)
                             ->setProviderName('Twitter')
                             ->setStatus(true)
-                            ->setTransctionType(Event::TRANSACTION_LIKE)
+                            ->setTransctionType(Event::TRANSACTION_UNFOLLOW)
                             ->setData(array(
                                 'user_id' => $item->getUserId(),
                                 'user_name' => $item->getUserName()
                             ))
                         );
                     } else {
-                        $this->container->get('follower_event_dispatcher')->dispatchReShareFailed((new Event())
+                        $this->container->get('follower_event_dispatcher')->dispatchUnfollowFailed((new Event())
                             ->setProviderId(1)
                             ->setProviderName('Twitter')
                             ->setStatus(false)
-                            ->setTransctionType(Event::TRANSACTION_LIKE)
+                            ->setTransctionType(Event::TRANSACTION_UNFOLLOW)
                             ->setData(array(
                                 'user_id' => $item->getUserId(),
                                 'user_name' => $item->getUserName()
