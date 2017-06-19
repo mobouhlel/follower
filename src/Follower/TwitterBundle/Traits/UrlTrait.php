@@ -32,7 +32,7 @@ trait UrlTrait
     /**
      * @var string
      */
-    private $follow = 'https://twitter.com/i/user/follow';
+    private $follow = 'https://api.twitter.com/1.1/friendships/create.json';
 
     /**
      * @var string

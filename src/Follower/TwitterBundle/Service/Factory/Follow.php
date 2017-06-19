@@ -22,10 +22,14 @@ class Follow extends AbstractService implements FollowInterface
     public function follow($userId)
     {
         $formData = array(
-            'authenticity_token' => $this->getCookieJar()->get('auth_token')->getValue(),
             'challenges_passed' => false,
             'handles_challenges' => true,
-            'impression_id' => null,
+            'include_blocked_by' => true,
+            'include_blocking' => true,
+            'include_followed_by' => true,
+            'include_can_dm' => true,
+            'include_mute_edge' => true,
+            'skip_status' => true,
             'user_id' => $userId
         );
 
@@ -35,7 +39,10 @@ class Follow extends AbstractService implements FollowInterface
         $this->client->setHeader('content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
 //        $this->client->setHeader('referer', $referer);
         $this->client->setHeader('user-agent', $this->getUserAgent());
-        $this->client->setHeader('x-requested-with', 'XMLHttpRequest');
+        $this->client->setHeader('x-twitter-active-user', 'yes');
+        $this->client->setHeader('x-twitter-auth-type', 'OAuth2Session');
+        $this->client->setHeader('authorization', $this->token);
+        $this->client->setHeader('x-csrf-token', $this->getCookieJar()->get('ct0')->getValue());
 
         $this->client->request('POST',$this->getFollowUrl(), $formData, array(), array(
             'HTTP_USER_AGENT' => $this->getUserAgent()
@@ -44,13 +51,20 @@ class Follow extends AbstractService implements FollowInterface
         /** @var Response $response */
         $response = $this->client->getResponse();
 
-        if($response->getHeader('status') === self::HEADER_BLOCKED)
-            throw new BadRequestHttpException(self::HEADER_BLOCKED);
+        if($response->getHeader('status') === self::HEADER_BLOCKED) {
+            var_dump($response->getContent());
 
-        if($response->getStatus() != 200)
+            throw new BadRequestHttpException(self::HEADER_BLOCKED);
+        }
+
+        if($response->getStatus() != 200) {
+            var_dump($response->getContent());
+
             throw new BadRequestHttpException(
-                'Invalid response code: ' . $response->getStatus() . ', headers: ' . json_encode($response->getHeaders())
+                'Invalid response codes: ' . $response->getStatus() . ', headers: ' . json_encode($response->getHeaders())
             );
+        }
+
 
         $result = json_decode($response->getContent(), true);
 

@@ -7,8 +7,6 @@ use Follower\TwitterBundle\Traits\ParameterTrait;
 use Follower\TwitterBundle\Traits\RequestTrait;
 use Follower\TwitterBundle\Traits\UrlTrait;
 use Goutte\Client;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -24,6 +22,8 @@ class AbstractService
     use ParameterTrait;
 
     use RequestTrait;
+
+    public $token;
 
     /** @var Container $container */
     protected $container;
@@ -53,8 +53,7 @@ class AbstractService
                 ->setProviderName('Twitter')
                 ->setStatus(true)
                 ->setTransctionType(Event::TRANSACTION_LOGIN)
-                ->setData(array(
-                ))
+                ->setData(array())
             );
 
             return true;
@@ -62,7 +61,7 @@ class AbstractService
 
         $crawler = $this->client->request('GET', $this->getLoginUrl());
 
-        if($crawler->selectButton("Giriş yap")->count()) {
+        if ($crawler->selectButton("Giriş yap")->count()) {
             $loginForm = $crawler->selectButton("Giriş yap")->form(array(
                 'session[username_or_email]' => $this->getUsername(),
                 'session[password]' => $this->getPassword()
@@ -78,14 +77,13 @@ class AbstractService
 
         $result = $this->client->submit($loginForm);
 
-        if(!$this->loggedIn($result->html())) {
+        if (!$this->loggedIn($result->html())) {
             $this->container->get('follower_event_dispatcher')->dispatchLoginFailed((new Event())
                 ->setProviderId(1)
                 ->setProviderName('Twitter')
                 ->setStatus(false)
                 ->setTransctionType(Event::TRANSACTION_LOGIN)
-                ->setData(array(
-                ))
+                ->setData(array())
             );
 
             throw new \Exception('Login failed');
@@ -95,18 +93,39 @@ class AbstractService
                 ->setProviderName('Twitter')
                 ->setStatus(true)
                 ->setTransctionType(Event::TRANSACTION_LOGIN)
-                ->setData(array(
-                ))
+                ->setData(array())
             );
         }
 
         $this->saveCookie();
     }
 
+    /**
+     * prepare token. Firstly, find init.js current version.
+     * After, find token from init.js file.
+     * Finally, Token prepared.
+     */
+    public function setToken($response)
+    {
+        preg_match_all('/https:\/\/abs.twimg.com\/k\/(.*)init(.*).js/i', $response, $matches);
+
+        $link = current(current($matches));
+
+        $guzzleClient = new \GuzzleHttp\Client();
+
+        $response = $guzzleClient->get($link)->getBody()->getContents();
+
+        preg_match_all('/var i=\"(.*)\";t.default/i', $response, $matches);
+
+        $this->token = 'Bearer ' . current($matches[1]);
+    }
+
     protected function loggedIn($response = null)
     {
         if (!$response)
             $response = $this->client->request('GET', $this->getBaseUrl())->html();
+
+        $this->setToken($response);
 
         return preg_match('/signout-form/', $response);
     }
